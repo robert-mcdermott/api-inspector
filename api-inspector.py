@@ -99,6 +99,7 @@ def analyze_headers(headers: Dict[str, str]) -> HeaderAnalysis:
     
     webhook_patterns = [
         r'^x-github-.*', r'^x-stripe-.*', r'^x-paypal-.*', r'^x-slack-.*',
+        r'^x-gitlab-.*', r'^x-atlassian-.*', r'^x-ms-.*',
         r'^x-webhook-.*', r'^webhook-.*', r'^x-.*-event$', r'^x-.*-delivery$'
     ]
     
@@ -178,14 +179,26 @@ def detect_webhook_type(headers: Dict[str, str], path: str) -> Optional[str]:
     # Slack
     if 'x-slack-signature' in headers_lower or 'slack' in path_lower:
         return 'Slack'
-    
+
+    # GitLab
+    if 'x-gitlab-event' in headers_lower or 'x-gitlab-token' in headers_lower or 'gitlab' in path_lower:
+        return 'GitLab'
+
+    # Jira
+    if 'x-atlassian-webhook-identifier' in headers_lower or 'jira' in path_lower or 'atlassian' in path_lower:
+        return 'Jira'
+
+    # Microsoft Teams
+    if 'x-ms-signature' in headers_lower or 'teams' in path_lower or ('user-agent' in headers_lower and 'microsoft' in headers_lower['user-agent'].lower()):
+        return 'Microsoft Teams'
+
     # Generic webhook indicators
-    if ('x-webhook-signature' in headers_lower or 
+    if ('x-webhook-signature' in headers_lower or
         'webhook-signature' in headers_lower or
         'webhook' in path_lower or
         any(k.endswith('-event') for k in headers_lower)):
         return 'Generic Webhook'
-    
+
     return None
 
 async def log_request_details(request: Request, body: bytes = b"") -> CapturedRequest:
@@ -986,6 +999,35 @@ async def root():
   -H "Content-Type: application/json" \\
   -d '{{"ref": "refs/heads/main", "repository": {{"name": "test-repo"}}}}'</pre>
                         </div>
+
+                        <div class="endpoint-card">
+                            <div class="endpoint-title">Example: GitLab Webhook Simulation</div>
+                            <div class="endpoint-description">Simulate a GitLab webhook event</div>
+                            <pre class="code-example">curl -X POST "http://localhost:8000/webhook/gitlab" \\
+  -H "X-Gitlab-Event: Push Hook" \\
+  -H "X-Gitlab-Token: secret-token" \\
+  -H "Content-Type: application/json" \\
+  -d '{{"object_kind": "push", "project": {{"name": "test-repo"}}}}'</pre>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <div class="endpoint-title">Example: Jira Webhook Simulation</div>
+                            <div class="endpoint-description">Simulate a Jira webhook event</div>
+                            <pre class="code-example">curl -X POST "http://localhost:8000/webhook/jira" \\
+  -H "X-Atlassian-Webhook-Identifier: unique-webhook-id" \\
+  -H "Content-Type: application/json" \\
+  -d '{{"webhookEvent": "jira:issue_created", "issue": {{"key": "PROJ-123"}}}}'</pre>
+                        </div>
+
+                        <div class="endpoint-card">
+                            <div class="endpoint-title">Example: Microsoft Teams Webhook Simulation</div>
+                            <div class="endpoint-description">Simulate a Microsoft Teams webhook event</div>
+                            <pre class="code-example">curl -X POST "http://localhost:8000/webhook/teams" \\
+  -H "X-MS-Signature: signature-value" \\
+  -H "Content-Type: application/json" \\
+  -H "User-Agent: Microsoft-Teams" \\
+  -d '{{"type": "message", "text": "Hello from Teams"}}'</pre>
+                        </div>
                     </div>
 
                     <div class="help-section">
@@ -1101,6 +1143,9 @@ curl -X POST "http://localhost:8000/admin/replay/{{request_id}}" \\
                             <li><strong>Stripe</strong> - Identifies via <code>X-Stripe-Signature</code> header</li>
                             <li><strong>PayPal</strong> - Identifies via <code>X-PayPal-*</code> headers</li>
                             <li><strong>Slack</strong> - Identifies via <code>X-Slack-Signature</code> header</li>
+                            <li><strong>GitLab</strong> - Identifies via <code>X-Gitlab-Event</code> or <code>X-Gitlab-Token</code> headers</li>
+                            <li><strong>Jira</strong> - Identifies via <code>X-Atlassian-Webhook-Identifier</code> header</li>
+                            <li><strong>Microsoft Teams</strong> - Identifies via <code>X-MS-Signature</code> header or User-Agent</li>
                             <li><strong>Generic Webhooks</strong> - Identifies via common webhook patterns</li>
                         </ul>
                     </div>
@@ -1948,7 +1993,7 @@ async def get_configuration():
             "search_capability": True
         },
         "supported_webhook_types": [
-            "GitHub", "Stripe", "PayPal", "Slack", "Generic Webhook"
+            "GitHub", "Stripe", "PayPal", "Slack", "GitLab", "Jira", "Microsoft Teams", "Generic Webhook"
         ],
         "supported_content_types": [
             "application/json", "application/x-www-form-urlencoded",

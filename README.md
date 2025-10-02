@@ -209,6 +209,9 @@ Automatically detects and identifies webhooks from:
 - **Stripe** - Identifies via `X-Stripe-Signature` header
 - **PayPal** - Identifies via `X-PayPal-*` headers
 - **Slack** - Identifies via `X-Slack-Signature` header
+- **GitLab** - Identifies via `X-Gitlab-Event` or `X-Gitlab-Token` headers
+- **Jira** - Identifies via `X-Atlassian-Webhook-Identifier` header
+- **Microsoft Teams** - Identifies via `X-MS-Signature` header or User-Agent
 - **Generic Webhooks** - Identifies via common webhook patterns
 
 ## Configuration
