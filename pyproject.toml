@@ -1,0 +1,14 @@
+[project]
+name = "api-inspector"
+version = "0.1.0"
+description = "A utility for capturing, analyzing, and inspecting HTTP requests and webhooks. Useful for debugging API integrations, testing webhook implementations, and analyzing HTTP calls."
+readme = "README.md"
+authors = [{ name = "Robert McDermott", email = "robert.c.mcdermott@gmail.com" }, ]
+license = "Apache 2.0"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.118.0",
+    "httpx>=0.28.1",
+    "pydantic>=2.11.9",
+    "uvicorn>=0.37.0",
+]
