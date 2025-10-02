@@ -253,11 +253,11 @@ The application uses in-memory storage with the following defaults:
 
 ```
 api-inspector/
-├── main.py              # Single-file FastAPI application
-├── pyproject.toml       # Dependencies and project metadata
+├── api-inspector.py    # Single-file FastAPI application
+├── pyproject.toml      # Dependencies and project metadata
 ├── uv.lock             # Locked dependency versions
 ├── api_captures.log    # Request log file (created on first run)
-├── CLAUDE.md           # Developer guidance for Claude Code
+├── LICENSE             # LICENSE file
 └── README.md           # This file
 ```
 
@@ -275,24 +275,4 @@ api-inspector/
 - **Pydantic** - Data validation using Python type annotations
 - **httpx** - HTTP client for request replay functionality
 
-## Limitations
-
-- **In-Memory Storage**: Data is lost on restart (configure external storage for persistence)
-- **Single Instance**: Not designed for horizontal scaling without external storage
-- **No Authentication**: Admin endpoints are unprotected (add auth for production use)
-- **Limited Capacity**: Stores only the last 500 requests
-
-## Future Enhancements
-
-- Persistent storage backend (Redis, PostgreSQL)
-- WebSocket support for real-time updates
-- Request/response mocking capabilities
-- Custom webhook signature validation
-- Rate limiting and throttling
-- Multi-tenancy support
-- Request diffing and comparison tools
-
-## License
-
-Apache 2.0
 
